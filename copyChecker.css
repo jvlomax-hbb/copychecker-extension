@@ -1,0 +1,221 @@
+@keyframes adverb-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #c4e3f3;
+    }
+}
+
+.adverb {
+    animation: adverb-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+.score {
+    background: #ffcc00;
+}
+
+@keyframes youwords-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #00ffff;
+    }
+}
+
+.you {
+    animation: youwords-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+@keyframes goodwords-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #1234ff;
+    }
+}
+
+.goodwords {
+    animation: goodwords-color-anim 1s forwards;
+    animation-delay: .25s;
+    color: #fff;
+}
+
+@keyframes we-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #00ff00;
+    }
+}
+
+.we {
+    animation: we-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+@keyframes exclaim-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #000080;
+    }
+}
+
+.exclaim {
+    animation: exclaim-color-anim 1s forwards;
+    animation-delay: .25s;
+    color: #fff;
+}
+
+@keyframes qualifier-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #c4e3f3;
+    }
+}
+
+.qualifier {
+    animation: qualifier-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+@keyframes passive-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #008080;
+    }
+}
+
+.passive {
+    animation: passive-color-anim 1s forwards;
+    animation-delay: .25s;
+    color: #fff;
+}
+
+
+
+.complex-tab {
+    background: #e3b7e8;
+}
+
+
+@keyframes complex-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #e3b7e8;
+    }
+}
+
+.complex {
+    animation: complex-color-anim 1s forwards;
+    animation-delay: .25s;
+    position: relative;
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    /* If you want dots under the hoverable text */
+}
+
+/* Tooltip text */
+.complex .tooltiptext {
+    visibility: hidden;
+    width: 120px;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    padding: 5px 0;
+    border-radius: 6px;
+
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+}
+
+/* Show the tooltip text when you mouse over the tooltip container */
+.complex:hover .tooltiptext {
+    visibility: visible;
+}
+
+@keyframes hard-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #f7ecb5;
+    }
+}
+
+.hardSentence {
+    animation: hard-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+@keyframes very-hard-color-anim {
+    0% {
+        background-color: none;
+    }
+
+    100% {
+        background-color: #e4b9b9;
+    }
+}
+
+.veryHardSentence {
+    animation: very-hard-color-anim 1s forwards;
+    animation-delay: .25s;
+}
+
+#text-area,
+#output {
+    width: 100%;
+    text-align: left;
+    padding: 5% 5%;
+}
+
+.counter {
+    padding: 5% 5%;
+}
+
+.margin {
+    margin-bottom: 45px;
+}
+
+.bg-1 {
+    background-color: #1abc9c;
+    color: #ffffff;
+}
+
+.bg-2 {
+    background-color: #f6f6f6;
+}
+
+.bg-3 {
+    background-color: #ffffff;
+    color: #555555;
+}
+
+.bg-4 {
+    background-color: #2f2f2f;
+    color: #fff;
+}

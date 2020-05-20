@@ -8,18 +8,33 @@
       "default_title": "ChromiePop"
   },
   "icons": {
-    "128": "images/favicon.png"
+    "128": "images/favicon.png",
+    "16": "images/favicon.png"
+  },
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "windows": "Ctrl+Shift+H"
+      }
+    }
   },
   "permissions": [
     "activeTab",
     "storage",
-    "declarativeContent"
+    "declarativeContent",
+    "contextMenus"
   ],
+  "background": {
+    "scripts": ["contextMenu.js"]
+  },
   "manifest_version": 2,
+  
   "web_accessible_resources": ["style.css"],
   "content_scripts": [{
         "matches": ["<all_urls>"],
         "all_frames": true,
-        "js":      ["content_script.js"]
+        "css": ["copyChecker.css"],
+        "js":  ["content_script.js"],
+        "match_about_blank": true
     }]  
 }
