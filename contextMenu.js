@@ -1,4 +1,5 @@
 function onContextClick(info, tab) {
+    console.log("on click");
     chrome.tabs.query(
         { active: true, currentWindow: true },
         (tabs) => {

@@ -6,6 +6,14 @@
 
 // This calls the analyze function
 
+function updateContentText(){
+  console.log("update text");
+  chrome.storage.local.get("contentText", function(result){
+      conentDiv = document.getElementById("contentDiv");
+      console.log(result)
+      contentDiv.innerHTML = result.contentText;
+  });
+};
 
 function updateCounterText() {
   chrome.storage.local.get('counters', function(result) {
@@ -27,8 +35,11 @@ function updateCounterText() {
 }
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-    if(request.event == "counters_updated"){
+    if(request.event == "countersUpdated"){
       updateCounterText();
+    }
+    if(request.event == "contentUpdated"){
+      updateContentText();
     }
     
 });
@@ -51,4 +62,5 @@ document.getElementById('clear').onclick = function() {
 };
 window.onload = function() {
   updateCounterText();
+  updateContentText();
 };

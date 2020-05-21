@@ -11,13 +11,6 @@
     "128": "images/favicon.png",
     "16": "images/favicon.png"
   },
-  "commands": {
-    "_execute_browser_action": {
-      "suggested_key": {
-        "windows": "Ctrl+Shift+H"
-      }
-    }
-  },
   "permissions": [
     "activeTab",
     "storage",

@@ -4,15 +4,9 @@ chrome.runtime.onMessage.addListener(
   function (request) {
     if (request.event == "analyze") {
       chrome.storage.local.set({ 'formatted': format(
-
       ) }, function () {
         console.log('Saved formatted');
-        chrome.runtime.sendMessage({ event: "updated_html" });
-
-      });
-      chrome.storage.local.set({ 'counters': counters() }, function () {
-        console.log('Stored counters');
-        chrome.runtime.sendMessage({ event: "counters_updated" });
+        chrome.runtime.sendMessage({ event: "contentUpdated" });
 
       });
     }
@@ -98,7 +92,7 @@ function format(text) {
     goodWords: 0,
     exclaim: 0
   };
-console.log(document.activeElement.nodeName.toLowerCase());
+  console.log(document.activeElement.nodeName.toLowerCase());
   if(document.activeElement.nodeName.toLowerCase() == "textarea"){
     text = window.getSelection().toString();
     let paragraphs = text.split("\n");
@@ -116,36 +110,50 @@ console.log(document.activeElement.nodeName.toLowerCase());
     data.paragraphs = strippedParagraphs.length;
     
     console.log(new_node);
-    window.getSelection().anchorNode.parentNode.appendChild(new_node);
+    //window.getSelection().anchorNode.parentNode.appendChild(new_node);
     //node.innerHTML = inP.join(" ");
-    
+    chrome.storage.local.set({ 'contentText': hardSentences.map(para => `${para}`).join("<br>") }, function () {
+      console.log("Updated ConenetText");
+      chrome.runtime.sendMessage({ event: "contentUpdated" });
+  
+    });
     return;
-  }
-  let selection = window.getSelection();
-  let nodes = [];
-  // If we have selected more than one node, we have to do some extra work
-  if(selection.anchorNode == selection.focusNode){
-    if(selection.anchorNode.parentNode){
-      nodes.push(selection.anchorNode.parentNode);
-    }
-    
   }else{
-    nodes = getSelectedNodes();
-    nodes = nodes.filter(n => n.nodeName != "#text");
-  }
-console.log(nodes);
-nodes.forEach(node =>{
-  text = node.innerText;
-  let paragraphs = text.split("\n");
-  let strippedParagraphs = paragraphs.filter(p => p !== "");
 
-  // Pass back the text, formatted, with results
-  let hardSentences = strippedParagraphs.map(p => getDifficultSentences(p));
-  let inP = hardSentences.map(para => `${para}`);
-  data.paragraphs = strippedParagraphs.length;
-  node.innerHTML = inP.join(" ");
-});
-window.getSelection().removeAllRanges();
+    
+    
+    
+    let selection = window.getSelection();
+    let nodes = [];
+    // If we have selected more than one node, we have to do some extra work
+    if(selection.anchorNode == selection.focusNode){
+      if(selection.anchorNode.parentNode){
+        nodes.push(selection.anchorNode.parentNode);
+      }
+      
+    }else{
+      nodes = getSelectedNodes();
+      nodes = nodes.filter(n => n.nodeName != "#text");
+    }
+    console.log(nodes);
+    nodes.forEach(node =>{
+      text = node.innerText;
+      let paragraphs = text.split("\n");
+      let strippedParagraphs = paragraphs.filter(p => p !== "");
+
+      // Pass back the text, formatted, with results
+      let hardSentences = strippedParagraphs.map(p => getDifficultSentences(p));
+      let inP = hardSentences.map(para => `${para}`);
+      data.paragraphs = strippedParagraphs.length;
+      node.innerHTML = inP.join(" ");
+    });
+  window.getSelection().removeAllRanges();
+  chrome.storage.local.set({ 'counters': counters() }, function () {
+    console.log('Stored counters');
+    chrome.runtime.sendMessage({ event: "counters_updated" });
+
+  });
+  }
   /*
   text = node.innerText;
   let paragraphs = text.split("\n");
