@@ -9,20 +9,27 @@
 function updateContentText(){
   console.log("update text");
   chrome.storage.local.get("contentText", function(result){
+      
       conentDiv = document.getElementById("contentDiv");
-      console.log(result)
-      contentDiv.innerHTML = result.contentText;
+      hr = document.getElementById("pageDivider");
+      if(typeof result.contentText !== 'undefined'){
+        hr.classList.remove("hidden");
+        contentDiv.innerHTML = result.contentText;
+      }else{
+        hr.classList.add("hidden");
+      }
+     
   });
 };
 
-function updateCounterText() {
-  chrome.storage.local.get('counters', function(result) {
+function updateResultsText() {
+  chrome.storage.local.get('results', function(result) {
     if(!result){
       return;
     }
-    if(result.hasOwnProperty("counters")){
+    if(result.hasOwnProperty("results")){
       let formattedScore = document.getElementById('displayScore');
-      const values = Object.values(result.counters);
+      const values = Object.values(result.results);
       for (i=0; i<values.length; i++) {
         let child = document.createElement('li');
         child.innerHTML = values[i];
@@ -34,33 +41,43 @@ function updateCounterText() {
   });
 }
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-    if(request.event == "countersUpdated"){
-      updateCounterText();
-    }
-    if(request.event == "contentUpdated"){
-      updateContentText();
-    }
-    
-});
+function clear_data(){
+  chrome.storage.local.remove("results", function(){
+    updateResultsText();
+   
+  });
+  chrome.storage.local.remove("contentText", function(){
+    updateContentText();
+  });
+}
+
+/* BUTTON HANDLERS */
+document.getElementById('clear').onclick = function() {
+  clear_data();
+};
+
 
 document.getElementById('analyze').onclick = function() {
   // Tell the content_script to do all the work
-  chrome.storage.local.remove("counters", function(){
+  chrome.storage.local.remove("results", function(){
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
       chrome.tabs.sendMessage(tabs[0].id, {event: "analyze"});  
     });
   });
 };
   
-
-document.getElementById('clear').onclick = function() {
-  chrome.storage.local.remove("counters", function(){
-    updateCounterText();
-  });
-  
-};
+/* EVENT LISTENERS */
 window.onload = function() {
-  updateCounterText();
+  updateResultsText();
   updateContentText();
 };
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
+  if(request.event == "resultsUpdated"){
+    updateResultsText();
+  }
+  if(request.event == "contentUpdated"){
+    updateContentText();
+  }
+  
+});

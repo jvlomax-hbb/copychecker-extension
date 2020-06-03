@@ -3,29 +3,9 @@
 chrome.runtime.onMessage.addListener(
   function (request) {
     if (request.event == "analyze") {
-      chrome.storage.local.set({ 'formatted': format(
-      ) }, function () {
-        console.log('Saved formatted');
-        chrome.runtime.sendMessage({ event: "contentUpdated" });
-
-      });
+      generateResults();
     }
   });
-
-let data = {
-  paragraphs: 0,
-  sentences: 0,
-  words: 0,
-  hardSentences: 0,
-  veryHardSentences: 0,
-  adverbs: 0,
-  passiveVoice: 0,
-  complex: 0,
-  you: 0,
-  we: 0,
-  goodWords: 0,
-  exclaim: 0
-};
 
 
 function nextNode(node) {
@@ -77,7 +57,22 @@ function getSelectedNodes() {
   return [];
 }
 
-function format(text) {
+let data = {
+  paragraphs: 0,
+  sentences: 0,
+  words: 0,
+  hardSentences: 0,
+  veryHardSentences: 0,
+  adverbs: 0,
+  passiveVoice: 0,
+  complex: 0,
+  you: 0,
+  we: 0,
+  goodWords: 0,
+  exclaim: 0
+};
+
+function generateResults(text) {
   data = {
     paragraphs: 0,
     sentences: 0,
@@ -92,81 +87,78 @@ function format(text) {
     goodWords: 0,
     exclaim: 0
   };
-  console.log(document.activeElement.nodeName.toLowerCase());
+  
+  let annotated_text = [];
   if(document.activeElement.nodeName.toLowerCase() == "textarea"){
+    console.log("text are");
     text = window.getSelection().toString();
     let paragraphs = text.split("\n");
     let strippedParagraphs = paragraphs.filter(p => p !== "");
-  
     // Pass back the text, formatted, with results
     let hardSentences = strippedParagraphs.map(p => getDifficultSentences(p));
-    new_node = document.createElement("DIV");
-    hardSentences.forEach( sentence => {
-      p_element = document.createElement("P");
-      p_element.innerHTML = sentence;
-      new_node.appendChild(p_element);
-    });
-    //let inP = hardSentences.map(para => `<p>${para}</p>`);
     data.paragraphs = strippedParagraphs.length;
+    console.log(hardSentences);
+    annotated_text = hardSentences.map(para => `${para}`);
     
-    console.log(new_node);
-    //window.getSelection().anchorNode.parentNode.appendChild(new_node);
-    //node.innerHTML = inP.join(" ");
-    chrome.storage.local.set({ 'contentText': hardSentences.map(para => `${para}`).join("<br>") }, function () {
-      console.log("Updated ConenetText");
-      chrome.runtime.sendMessage({ event: "contentUpdated" });
-  
-    });
-    return;
-  }else{
-
-    
-    
-    
+  } else {
+    // for text on page
     let selection = window.getSelection();
     let nodes = [];
-    // If we have selected more than one node, we have to do some extra work
+    // If the selection stops and starts in the same node, we are good to use just the text from that
+    // single node
     if(selection.anchorNode == selection.focusNode){
-      if(selection.anchorNode.parentNode){
+      if(selection.anchorNode){
         nodes.push(selection.anchorNode.parentNode);
+      }else{
+        // nothing selected. Gracefully return
+        return;
       }
       
+    // If we have selected more than one node, we have to do some extra work
     }else{
       nodes = getSelectedNodes();
       nodes = nodes.filter(n => n.nodeName != "#text");
-    }
-    console.log(nodes);
+      // If we have previously annotated the text, ignore the spans we have inserted by classname
+      nodes = nodes.filter(n => ![
+        "adverb", 
+        "hardSentence", 
+        "veryHardSentence", 
+        "passive", 
+        "you", 
+        "we",
+        "goodwords",
+        "exclaim",
+        "complex",
+        "tooltip",
+        "tooltiptext"
+      ].includes(n.className));
+    }  
+    // for each node, we set the text to be our annoted text  
     nodes.forEach(node =>{
       text = node.innerText;
       let paragraphs = text.split("\n");
       let strippedParagraphs = paragraphs.filter(p => p !== "");
-
       // Pass back the text, formatted, with results
       let hardSentences = strippedParagraphs.map(p => getDifficultSentences(p));
       let inP = hardSentences.map(para => `${para}`);
       data.paragraphs = strippedParagraphs.length;
       node.innerHTML = inP.join(" ");
+      annotated_text.push(inP.join(" "));
     });
+  }
+ 
   window.getSelection().removeAllRanges();
-  chrome.storage.local.set({ 'counters': counters() }, function () {
-    console.log('Stored counters');
-    chrome.runtime.sendMessage({ event: "counters_updated" });
+  chrome.storage.local.set({'annotatedPage': window.location.href});
+  chrome.storage.local.set({ 'results': results() }, function () {
+    
+    chrome.runtime.sendMessage({ event: "resultsUpdated" });
 
   });
-  }
-  /*
-  text = node.innerText;
-  let paragraphs = text.split("\n");
-  let strippedParagraphs = paragraphs.filter(p => p !== "");
-
-  Pass back the text, formatted, with results
-  let hardSentences = strippedParagraphs.map(p => getDifficultSentences(p));
-  let inP = hardSentences.map(para => `<p>${para}</p>`);
-  data.paragraphs = strippedParagraphs.length;
-  selection.anchorNode.parentNode.innerHTML = inP.join(" ");
-  */
-  //return inP.join(" ");
+  chrome.storage.local.set({'contentText': annotated_text.map(para => `<p>${para}</p>`).join(" ")}, function(){
+    chrome.runtime.sendMessage({event: "contentUpdated"});
+  });
 }
+
 
 function pluralize(word, number) {
   return (number == 1) ? word : word + "s";
@@ -185,7 +177,7 @@ function getAdverbText() {
       } ${pluralize("adverb", data.adverbs)}</span>. Try to use ${Math.round(
         data.paragraphs / 3
       )} or fewer in text of this length`;
-  };
+  }
 }
 
 function getPassiveText() {
@@ -223,35 +215,35 @@ function getVeryHardSentenceText() {
 }
 
 function getYouText() {
-  let preamble = `Words like you and your reference the donor, and add power.
-  Try to have as many as possible, and more than you have words like I, we, etc.`
+  let preamble = `Words like <span class="you">you</span> and <span class="you">your</span> reference the donor, and add power.
+  Try to have as many as possible, and more than you have words like I, we, etc.`;
   return preamble + `You have used ${
     data.you
-    } instances of you words. Try to use ${Math.round(
+    } instances of <span class="you">you words</span>. Try to use ${Math.round(
       data.sentences / 2
     )} or more`;
 }
 
 function getWeText() {
-  let preamble = `Words like I and we reference your organisation, and make you
+  let preamble = `Words like <span class="we">I</span> and <span class="we">we</span> reference your organisation, and make you
   seem introverted. Talk instead about the impact of the donor's gift, and what
-  they are creating at your organisation.`
+  they are creating at your organisation.`;
   return preamble + `You have used ${
     data.we
-    } instances of I and we words. Try to use ${Math.round(
+    } instances of <span class="we">I</span> and <span class="we">we</span> words. Try to use ${Math.round(
       data.sentences / 5
     )} or fewer`;
 }
 
 function getExclaimText() {
   if (data.exclaim > 1) {
-    return `You have used ${
+    return `You have used <span class="exclaim">${
       data.exclaim
-      } exclamation marks. You should be ashamed of yourself. Exclamation marks suck.`;
+      } exclamation marks</span>. You should be ashamed of yourself. Exclamation marks suck.`;
   } else if (data.exclaim == 1) {
-    return "You only have 1 exclamation mark, which isn't bad. Still, can you try removing it?";
+    return "You only have <span class=\"exclaim\">1 exclamation mark</span>, which isn't bad. Still, can you try removing it?";
   } else {
-    return "Well done, your words speak for themselves and you've used none of those dreadful exclamation marks.";
+    return "Well done, your words speak for themselves and you've used none of those dreadful <span class=\"exclaim\">exclamation marks</span>.";
   }
 }
 
@@ -267,22 +259,22 @@ function calculateScore() {
 
 function getGoodWordsText() {
   if (data.goodWords >= 1) {
-    return `You've one or more magic, emotive words, as highlighted. Nice.`;
+    return `You've one or more magic, emotive words, as <span class="goodwords">highlighted.</span> Nice.`;
   } else {
-    return `When talking about donors or gifts, try using more powerful adjectives.`;
+    return `When talking about donors or gifts, try using more powerful <span class="goodwords">adjectives.</span>`;
   }
 }
 
 function getScoreText() {
   let score = calculateScore();
   if (score <= 50) {
-    return `You have scored ${score}/100. Keep working on it.`;
+    return `<strong>You have scored ${score}/100. Keep working on it.</strong>`;
   } else if (score <= 75) {
-    return `You have scored ${score}/100. Nearly there.`;
+    return `<strong>You have scored ${score}/100. Nearly there.</strong>`;
   } else if (score < 90) {
-    return `You have scored ${score}/100. Pretty good. Can you make it to 90?`;
+    return `<strong>You have scored ${score}/100. Pretty good. Can you make it to 90?</strong>`;
   } else {
-    return `You have scored ${score}/100. Go raise your money now.`
+    return `<strong>You have scored ${score}/100. Go raise your money now.</strong>`;
   }
 }
 
@@ -290,8 +282,9 @@ function wrapCopy(copy) {
   return "<p>" + copy + "</p>";
 }
 
-function counters() {
+function results() {
   return {
+    _score: wrapCopy(getScoreText()), // _ to ensure it comes top of the list
     adverb: wrapCopy(getAdverbText()),
     passive: wrapCopy(getPassiveText()),
     complex: wrapCopy(getComplexText()),
@@ -301,7 +294,6 @@ function counters() {
     we: wrapCopy(getWeText()),
     goodwords: wrapCopy(getGoodWordsText()),
     exclaim: wrapCopy(getExclaimText()),
-    score: wrapCopy(getScoreText()),
   };
 }
 

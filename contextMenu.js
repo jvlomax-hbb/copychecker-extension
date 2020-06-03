@@ -17,3 +17,26 @@ chrome.contextMenus.create({
     onclick: onContextClick,
     visible: true
 });
+
+
+chrome.tabs.onActiveChanged.addListener(function(tabId){
+    chrome.storage.local.remove("results", function(){
+        chrome.runtime.sendMessage( { event: "resultsupdated" });
+     
+    });
+    chrome.storage.local.remove("contentText", function(){
+        chrome.runtime.sendMessage({ event: "contentUpdated" });
+    });
+
+    // if the active page is currently known to be annotated, we refresh it
+    chrome.storage.local.get("annotatedPage", function(result){
+        if(typeof result.annotatedPage != "undefined"){
+            chrome.tabs.get(tabId, function(tab){
+                if(tab.url == result.annotatedPage && typeof tab.url != "undefined"){
+                    chrome.tabs.reload();
+                    chrome.storage.local.remove("annotatedPage");
+                }
+            });
+        }
+    });
+  });

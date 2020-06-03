@@ -1,30 +1,90 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
     <title>Fundraising Copy Checker</title>
     <style>
       body {
-        min-width: 300px;
+        min-width: 700px;
         font-size: 15px;
+        text-align: center;
+        font-family: 'Lato', sans-serif;
+        margin: 0px;
       }
       input {
         margin: 5px;
         outline: none;
+      }
+      .column {
+        flex: 50%;
+        text-align: left;
+      }
+      .row{
+        display: flex;
+      }
+      .content{
+        margin: 8px;
+      }
+      #contentDiv{
+        line-height: 1.5;
+        margin-left: 15px;
+      }
+      .header {
+        background-color: #5d5aa7;
+        padding: .5em;
+        color: white;
+      }
+      button {
+        background-color: #198fab; /* Green */
+        border: none;
+        color: white;
+        padding: 15px 32px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+      }
+      button:hover{
+        background-color: #48a7bd;
+      }
+      h4{
+        margin: .5em;
+      }
+      ul{
+        padding-left: 25px;
+      }
+      hr{
+        margin-top: 20px;
+        margin-bottom: 20px;
+      }
+      #scoreDisplay {
+        margin-right: 15px;
+      }
+      .hidden{
+        visibility: hidden;
       }
     </style>
     <link rel="stylesheet" href="copyChecker.css">
   </head>
 
   <body>
-    <h2>Fundraising Copy</h2>
-    <p>Analyze copy for fundraising.</p>
-    <div id="contentDiv"></div>
-    <ul id="displayScore">
-    </ul>
-    <form id="form">
-      <button id="analyze">Analyze</button>
-      <button id="clear">Clear</button>
-    </form>
+    <div class="header">
+      <h2>Fundraising Copy</h2>
+      <h4>Analyze copy for fundraising.</h4>
+    </div>
+    <div class="content">
+      <div class="row">
+        <div class="column" id="scoreDisplay">
+          <ul id="displayScore"></ul>
+        </div>
+        <hr id=pageDivider>
+        <div class="column" id="contentDiv" ></div>
+      </div>
+      <form id="form">
+        <button id="analyze">Analyze</button>
+        <button id="clear">Clear</button>
+      </form>
+  </div>
   </body>
   <script src="popup.js"></script>
 </html>

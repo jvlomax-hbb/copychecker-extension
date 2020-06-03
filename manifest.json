@@ -1,7 +1,7 @@
 {
-  "name": "Fundraising Copy Checker",
-  "description" : "Tells you if your copy is half-decent for fundraising purposes",
-  "version": "1.0",
+  "name": "Hubbub Fundraising Copy Checker",
+  "description" : "A simple tool to improve your fundraising copy",
+  "version": "0.0.1",
   "browser_action": {
       "default_icon": "images/favicon.png",
       "default_popup": "popup.html",
